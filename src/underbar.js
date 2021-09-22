@@ -112,35 +112,56 @@
     return result;
   };
 
-/*
-* Mutation of inputs should be avoided without good justification otherwise
-* as it can often lead to hard to find bugs and confusing code!
-* Imagine we were reading the code above, and we added the following line:
-*
-* var lastElement = input[input.length - 1];
-*
-* Without knowing that mutation occured inside of _.uniq,
-* we would assume that `lastElement` is 5. But if inside of
-* _.uniq, we use the array method `pop`, we would permanently
-* change `input` and our assumption would not longer be true,
-* `lastElement` would be 4 instead!
-*
-* The tricky part is that we have no way of knowing about the mutation
-* just by looking at the code above. We'd have to dive into the
-* implementation of _.uniq to the exact line that uses `pop`.
-* If we write a lot of code with this assumption, it might be very hard
-* to trace back to the correct line in _.uniq.
-*
-* You can avoid an entire class of bugs by writing functions
-* that don't mutate their inputs!
-*/
+  /*
+  * Mutation of inputs should be avoided without good justification otherwise
+  * as it can often lead to hard to find bugs and confusing code!
+  * Imagine we were reading the code above, and we added the following line:
+  *
+  * var lastElement = input[input.length - 1];
+  *
+  * Without knowing that mutation occured inside of _.uniq,
+  * we would assume that `lastElement` is 5. But if inside of
+  * _.uniq, we use the array method `pop`, we would permanently
+  * change `input` and our assumption would not longer be true,
+  * `lastElement` would be 4 instead!
+  *
+  * The tricky part is that we have no way of knowing about the mutation
+  * just by looking at the code above. We'd have to dive into the
+  * implementation of _.uniq to the exact line that uses `pop`.
+  * If we write a lot of code with this assumption, it might be very hard
+  * to trace back to the correct line in _.uniq.
+  *
+  * You can avoid an entire class of bugs by writing functions
+  * that don't mutate their inputs!
+  */
 
   // Produce a duplicate-free version of the array.
   _.uniq = function (array, isSorted, iterator) {
+
     var result = [];
-    for (var i = 0; i < array.length; i++) {
-      if (_.indexOf(result, array[i]) === -1) {
-        result.push(array[i]);
+    // if (iterator === undefined) {
+    //   iterator = _.identity;
+
+    // }
+    var resultIterator = [];
+    console.log('iterator', 'iterator', iterator);
+    console.log(resultIterator);
+    if (iterator !== undefined) {
+      for (var i = 0; i < array.length; i++) {
+        console.log('resultiterator is ', resultIterator);
+
+        if (_.indexOf(resultIterator, iterator(array[i])) === -1) {
+          console.log('resultiterator is ', resultIterator);
+          result.push(array[i]);
+          resultIterator.push(iterator(array[i])); // resultIterator is [1,2,3,4], why?
+        }
+      }
+    } else {
+
+      for (var i = 0; i < array.length; i++) {
+        if (_.indexOf(result, array[i]) === -1) {
+          result.push(array[i]);
+        }
       }
     }
     return result;
@@ -152,6 +173,12 @@
     // map() is a useful primitive iteration function that works a lot
     // like each(), but in addition to running the operation on all
     // the members, it also maintains an array of results.
+    var result = [];
+    _.each(collection, function (elem, index, collection) {
+      result.push(iterator(elem));
+    });
+
+    return result;
   };
 
   /*
@@ -193,6 +220,18 @@
   //   }); // should be 5, regardless of the iterator function passed in
   //          No accumulator is given so the first element is used.
   _.reduce = function (collection, iterator, accumulator) {
+    if (Array.isArray(collection)) {
+
+      if (accumulator === undefined) {
+        accumulator = collection[0];
+        collection = collection.slice(1);
+      }
+      for (var i = 0; i < collection.length; i ++) {
+        accumulator = iterator(accumulator, collection[i]);
+      }
+
+    }
+    return accumulator;
   };
 
   // Determine if the array or object contains a given value (using `===`).
