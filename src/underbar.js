@@ -229,7 +229,17 @@
       for (var i = 0; i < collection.length; i ++) {
         accumulator = iterator(accumulator, collection[i]);
       }
-
+    } else if (typeof collection === 'object') {
+      var arrKeys = Object.keys(collection);
+      if (accumulator === undefined) {
+        accumulator = collection[arrKeys[0]];
+        arrKeys = arrKeys.slice(1);
+      }
+      for (var i = 0; i < arrKeys.length; i++) {
+        var value = arrKeys[i];
+        // accumulator = iterator(accumulator, collection[arrKeys[i]]);
+        accumulator = iterator(accumulator, collection[value]);
+      }
     }
     return accumulator;
   };
